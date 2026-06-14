@@ -70,6 +70,12 @@
 
   /* ═══ CHART ═══ */
   .chart-wrap{height:400px;background:var(--bg1);border-top:1px solid var(--bd);border-bottom:1px solid var(--bd)}
+  .candle-cd{display:flex;align-items:center;justify-content:space-between;padding:8px 16px;background:var(--bg2);border-bottom:1px solid var(--bd)}
+  .cc-lbl{font-family:var(--mono);font-size:10px;color:var(--t1);font-weight:600;letter-spacing:0.5px}
+  .cc-lbl b{color:var(--gold)}
+  .cc-timer{font-family:var(--mono);font-size:16px;font-weight:700;color:var(--gold);letter-spacing:1px}
+  .cc-timer.soon{color:var(--red);animation:ccpulse 1s infinite}
+  @keyframes ccpulse{0%,100%{opacity:1}50%{opacity:0.45}}
 
   /* ═══ MINI SCORE ═══ */
   .mini-score{margin:12px 16px;padding:12px 16px;border-radius:10px;display:flex;align-items:center;justify-content:space-between;font-family:var(--mono);font-size:13px;font-weight:700;box-shadow:0 1px 4px rgba(0,0,0,0.05)}
@@ -266,6 +272,10 @@
 <div class="page active" id="pgChart">
   <div id="sessionBarChart" class="session-bar session-off" style="display:none"></div>
   <div class="tfbar" id="tfBar"></div>
+  <div class="candle-cd" id="candleCd">
+    <span class="cc-lbl">⏱ NẾN <b id="ccTf">M5</b> ĐÓNG SAU</span>
+    <span class="cc-timer" id="ccTimer">--:--</span>
+  </div>
   <div class="chart-wrap" id="tvChart"></div>
   <div class="mini-score v-none" id="miniScore">
     <span id="msScore">0/4</span>
@@ -806,6 +816,7 @@ function setTF(t, el) {
   el.classList.add("active");
   initChart();
   fetchSignals();
+  startCandleCountdown(); // reset countdown for new timeframe
 }
 
 function setDir(d) {
@@ -854,10 +865,10 @@ function renderSession() {
 // ══════════════════════════════════════════════════════
 
 // TradingView symbol for chart.
-// NOTE: "BINGX:XAUUSDT" does NOT exist on TradingView (gives "Mã không tồn tại").
-// BingX gold perp is "BINGX:GOLDXAUUSDT.P" but may not load on the free widget.
-// Safest: OANDA:XAUUSD (gold spot) — always available, ~99.9% match with BingX XAU price.
-const CHART_SYMBOL = "OANDA:XAUUSD";
+// Dùng BINANCE:PAXGUSDT để KHỚP 100% với giá hiển thị (cùng nguồn PAXG).
+// PAXG lệch giá tuyệt đối ~vài USD so với XAU spot nhưng biến động % giống hệt,
+// nên cấu trúc nến / EMA / RSI vẫn chuẩn cho tín hiệu kỹ thuật.
+const CHART_SYMBOL = "BINANCE:PAXGUSDT";
 
 function initChart() {
   whenTV(() => {
@@ -1739,6 +1750,39 @@ function startMacroTimers() {
   macroTimerInterval = setInterval(renderMacroCountdown, 1000); // live countdown
 }
 
+// ── Candle close countdown ──
+// Nến đóng tại bội số của khung thời gian tính từ đầu giờ (UTC-based, khớp sàn).
+const TF_MINUTES = { "1":1, "3":3, "5":5, "15":15 };
+let candleCdInterval = null;
+
+function renderCandleCountdown() {
+  const mins = TF_MINUTES[tf] || 5;
+  const periodMs = mins * 60000;
+  const now = Date.now();
+  // Candle boundaries align to epoch (same as exchange). Next close = next multiple.
+  const msIntoCandle = now % periodMs;
+  const msLeft = periodMs - msIntoCandle;
+
+  const totalSec = Math.floor(msLeft / 1000);
+  const mm = Math.floor(totalSec / 60);
+  const ss = totalSec % 60;
+
+  const tEl = document.getElementById("ccTimer");
+  const tfEl = document.getElementById("ccTf");
+  if (tfEl) tfEl.textContent = TFS.find(x => x[0] === tf)?.[1] || ("M" + mins);
+  if (tEl) {
+    tEl.textContent = `${String(mm).padStart(2,"0")}:${String(ss).padStart(2,"0")}`;
+    // Last 15s → highlight red (chuẩn bị đóng nến)
+    tEl.classList.toggle("soon", msLeft <= 15000);
+  }
+}
+
+function startCandleCountdown() {
+  renderCandleCountdown();
+  if (candleCdInterval) clearInterval(candleCdInterval);
+  candleCdInterval = setInterval(renderCandleCountdown, 1000);
+}
+
 // ══════════════════════════════════════════════════════
 //  CALCULATOR
 // ══════════════════════════════════════════════════════
@@ -1973,6 +2017,7 @@ renderStats();
 renderSession();
 updateNotifBtn();
 startMacroTimers();
+startCandleCountdown();
 fetchDXY();
 fetchAll();
 fetchSlow();

@@ -3,7 +3,7 @@
 // LƯU Ý: Thông báo được kích hoạt từ trang chính (app đang chạy/chạy nền),
 // KHÔNG phải push từ server. SW chỉ giúp app cài được & xử lý click notification.
 
-const CACHE_NAME = "locvang-v5-3";
+const CACHE_NAME = "locvang-v5-4";
 const ASSETS = [
   "./index.html",
   "./manifest.json"
