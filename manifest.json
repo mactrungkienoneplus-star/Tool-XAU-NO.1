@@ -2,7 +2,7 @@
   "name": "Lộc Vàng — Gold Signal",
   "short_name": "Lộc Vàng",
   "description": "Tín hiệu scalp XAU/USDT BingX — 4 lớp xác nhận, theo dõi hiệu suất",
-  "start_url": "./goldsignal_v5.html",
+  "start_url": "./index.html",
   "scope": "./",
   "display": "standalone",
   "orientation": "portrait",

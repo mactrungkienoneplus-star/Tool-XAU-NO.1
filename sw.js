@@ -3,9 +3,9 @@
 // LƯU Ý: Thông báo được kích hoạt từ trang chính (app đang chạy/chạy nền),
 // KHÔNG phải push từ server. SW chỉ giúp app cài được & xử lý click notification.
 
-const CACHE_NAME = "locvang-v5-2";
+const CACHE_NAME = "locvang-v5-3";
 const ASSETS = [
-  "./goldsignal_v5.html",
+  "./index.html",
   "./manifest.json"
 ];
 
@@ -53,7 +53,7 @@ self.addEventListener("notificationclick", (e) => {
         if ("focus" in client) return client.focus();
       }
       // Nếu chưa → mở mới
-      if (self.clients.openWindow) return self.clients.openWindow("./goldsignal_v5.html");
+      if (self.clients.openWindow) return self.clients.openWindow("./index.html");
     })
   );
 });
