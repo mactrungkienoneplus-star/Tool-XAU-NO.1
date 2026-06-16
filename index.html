@@ -113,6 +113,8 @@
   /* ═══ TRADE PLAN ═══ */
   .trade-plan{margin:0 16px 16px;background:linear-gradient(135deg,#fdf3d7,#fffaf0);border:1.5px solid var(--gold2);border-radius:10px;padding:13px;display:none}
   .trade-plan.vis{display:block}
+  .trade-plan.tp-ref{background:var(--bg2);border-color:var(--bd2);border-style:dashed;opacity:0.92}
+  .trade-plan.tp-ref .tp-title{color:var(--t1)}
   .tp-title{font-family:var(--mono);font-size:11px;letter-spacing:1px;color:var(--gold);margin-bottom:9px;font-weight:700}
   .tp-grid{display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:7px}
   .tp-cell{background:var(--bg1);border-radius:8px;padding:9px;text-align:center;border:1px solid var(--bd)}
@@ -304,7 +306,7 @@
     <div class="verdict v-none" id="verdict">— ĐANG PHÂN TÍCH —</div>
     <!-- Trade plan: entry / SL / TP1 / TP2 -->
     <div class="trade-plan" id="tradePlan">
-      <div class="tp-title">📋 KẾ HOẠCH SCALP (tham khảo · không phải lời khuyên tài chính)</div>
+      <div class="tp-title" id="tpTitle">📋 KẾ HOẠCH SCALP (tham khảo · không phải lời khuyên tài chính)</div>
       <div class="tp-grid" style="grid-template-columns:1fr 1fr 1fr 1fr 1fr">
         <div class="tp-cell"><div class="tp-l">VÀO</div><div class="tp-v" style="color:var(--gold)" id="tpEntry">—</div></div>
         <div class="tp-cell"><div class="tp-l">CẮT LỖ</div><div class="tp-v" style="color:var(--red)" id="tpSL">—</div></div>
@@ -1292,43 +1294,56 @@ async function fetchSignals() {
 
     let verdictTxt, verdictCls;
 
+    // Xác định hướng để tính mức giá tham khảo.
+    // Khi đủ 4/4: dùng bull/bear chuẩn. Khi chưa đủ: thiên theo M15 trend.
+    const planBull = bull || (!bear && tM15 === "TĂNG");
+    const planBear = bear || (!bull && tM15 === "GIẢM");
+    const planDir = planBull ? "bull" : planBear ? "bear" : (last >= vwapV ? "bull" : "bear");
+    const isBullPlan = planDir === "bull";
+
+    // Tính mức giá theo ATR — LUÔN tính, bất kể số điểm
+    const slDist = currentAtr * 1.0;
+    const entry = last;
+    const sl   = isBullPlan ? entry - slDist : entry + slDist;
+    const tp1  = isBullPlan ? entry + slDist * 1 : entry - slDist * 1;
+    const tp2  = isBullPlan ? entry + slDist * 2 : entry - slDist * 2;
+    const tp3  = isBullPlan ? entry + slDist * 3 : entry - slDist * 3;
+    const slPct = slDist / entry * 100;
+
+    // Hiện mức giá lên bảng (luôn luôn)
+    document.getElementById("tpEntry").textContent = fmtP(entry);
+    document.getElementById("tpSL").textContent    = fmtP(sl);
+    document.getElementById("tpTP1").textContent   = fmtP(tp1);
+    document.getElementById("tpTP2").textContent   = fmtP(tp2);
+    document.getElementById("tpTP3").textContent   = fmtP(tp3);
+
+    // Ghi chú độ an toàn đòn bẩy (luôn hiện)
+    const lev = parseFloat(document.getElementById("liqL").value) || 100;
+    const liqDist = (1 / lev) * 100;
+    const safetyRatio = slPct / liqDist;
+    let tpNoteText;
+    if (safetyRatio > 0.7) {
+      tpNoteText = `🔴 SL ${slPct.toFixed(3)}% = ${(safetyRatio*100).toFixed(0)}% khoảng cháy (${liqDist.toFixed(3)}%) — GIẢM ĐÒN BẨY NGAY!`;
+    } else if (safetyRatio > 0.4) {
+      tpNoteText = `🟡 SL ${slPct.toFixed(3)}% · Cháy lệnh ${lev}x: ${liqDist.toFixed(3)}% — Biên hẹp, đặt SL ngay`;
+    } else {
+      tpNoteText = `🟢 SL ${slPct.toFixed(3)}% · Cháy lệnh ${lev}x: ${liqDist.toFixed(3)}% — Tỉ lệ an toàn`;
+    }
+
+    // Tiêu đề bảng đổi theo trạng thái
+    const tpTitle = document.getElementById("tpTitle");
+    tp.classList.add("vis"); // LUÔN hiện bảng kế hoạch
+
     if (score === 4) {
       verdictTxt = bull ? "▲ VÀO LỆNH MUA" : "▼ VÀO LỆNH BÁN";
       verdictCls = bull ? "v-long" : "v-short";
       sn.textContent = "ĐỦ 4/4 ĐIỀU KIỆN 🧧";
       sn.style.color = "var(--green)";
-
-      // SL = 1x ATR (standard); TP1=1R, TP2=2R, TP3=3R
-      const slDist = currentAtr * 1.0;
-      const entry = last;
-      const sl   = bull ? entry - slDist : entry + slDist;
-      const tp1  = bull ? entry + slDist * 1 : entry - slDist * 1;
-      const tp2  = bull ? entry + slDist * 2 : entry - slDist * 2;
-      const tp3  = bull ? entry + slDist * 3 : entry - slDist * 3;
-      const slPct = slDist / entry * 100;
-
-      document.getElementById("tpEntry").textContent = fmtP(entry);
-      document.getElementById("tpSL").textContent    = fmtP(sl);
-      document.getElementById("tpTP1").textContent   = fmtP(tp1);
-      document.getElementById("tpTP2").textContent   = fmtP(tp2);
-      document.getElementById("tpTP3").textContent   = fmtP(tp3);
-
-      // Lev warning for trade plan
-      const lev = parseFloat(document.getElementById("liqL").value) || 100;
-      const liqDist = (1 / lev) * 100;  // % to liquidation (simplified, no MM fee)
-      const safetyRatio = slPct / liqDist;
-      let tpNoteText;
-      if (safetyRatio > 0.7) {
-        tpNoteText = `🔴 SL ${slPct.toFixed(3)}% = ${(safetyRatio*100).toFixed(0)}% khoảng cháy (${liqDist.toFixed(3)}%) — GIẢM ĐÒN BẨY NGAY!`;
-      } else if (safetyRatio > 0.4) {
-        tpNoteText = `🟡 SL ${slPct.toFixed(3)}% · Cháy lệnh ${lev}x: ${liqDist.toFixed(3)}% — Biên hẹp, đặt SL ngay`;
-      } else {
-        tpNoteText = `🟢 SL ${slPct.toFixed(3)}% · Cháy lệnh ${lev}x: ${liqDist.toFixed(3)}% — Tỉ lệ an toàn`;
-      }
+      if (tpTitle) tpTitle.textContent = "📋 KẾ HOẠCH SCALP — ĐỦ ĐIỀU KIỆN ✅";
+      tp.classList.remove("tp-ref");
       document.getElementById("tpNote").textContent = tpNoteText;
-      tp.classList.add("vis");
 
-      // Notify on new signal (debounce: min 15s between same direction)
+      // Notify + ghi lịch sử CHỈ khi 4/4
       const sigKey = bull ? "L" : "S";
       const now = Date.now();
       if (lastSignalDir !== sigKey || now - lastSignalTime > 300000) {
@@ -1344,8 +1359,13 @@ async function fetchSignals() {
         pushSignal(bull ? "LONG" : "SHORT", entry, sl, tp1, tp2, tp3, slDist);
       }
     } else {
-      tp.classList.remove("vis");
       lastSignalDir = null;
+      tp.classList.add("tp-ref"); // style mờ cho biết là tham khảo
+      const planDirTxt = isBullPlan ? "MUA ↑" : "BÁN ↓";
+      if (tpTitle) tpTitle.textContent = `📋 MỨC THAM KHẢO (thiên ${planDirTxt}) — CHƯA ĐỦ ĐIỀU KIỆN`;
+      document.getElementById("tpNote").textContent =
+        `⚠️ Mới ${score}/4 — số liệu chỉ để chuẩn bị, CHƯA nên vào lệnh. ${tpNoteText}`;
+
       if (score === 3) {
         verdictTxt = fundingBlock ? "⚠️ FUNDING CỰC ĐOAN — CHỜ" : "⏳ GẦN ĐỦ — CHỜ THÊM";
         verdictCls = "v-wait";
