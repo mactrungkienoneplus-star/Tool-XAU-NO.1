@@ -120,6 +120,14 @@
   .tp-cell{background:var(--bg1);border-radius:8px;padding:9px;text-align:center;border:1px solid var(--bd)}
   .tp-l{font-size:9px;color:var(--t2);font-family:var(--mono)}
   .tp-v{font-size:12px;font-weight:700;font-family:var(--mono);margin-top:3px}
+  .tp-rr{font-size:8px;font-family:var(--mono);font-weight:700;margin-top:2px;color:var(--green)}
+  .pf-row{display:flex;align-items:center;justify-content:space-between;padding:9px 12px;border-radius:8px;margin-bottom:6px;font-family:var(--mono)}
+  .pf-row-tp{background:var(--greenbg);border:1px solid rgba(14,138,69,0.3)}
+  .pf-row-sl{background:var(--redbg);border:1px solid rgba(217,48,37,0.3)}
+  .pf-lbl{font-size:11px;font-weight:700}
+  .pf-vals{text-align:right}
+  .pf-money{font-size:15px;font-weight:700}
+  .pf-roi{font-size:9px;margin-top:1px}
   .tp-note{font-size:9px;color:var(--t1);font-family:var(--mono);margin-top:9px;text-align:center;font-weight:600}
 
   /* ═══ SONIC RIBBON ═══ */
@@ -310,9 +318,9 @@
       <div class="tp-grid" style="grid-template-columns:1fr 1fr 1fr 1fr 1fr">
         <div class="tp-cell"><div class="tp-l">VÀO</div><div class="tp-v" style="color:var(--gold)" id="tpEntry">—</div></div>
         <div class="tp-cell"><div class="tp-l">CẮT LỖ</div><div class="tp-v" style="color:var(--red)" id="tpSL">—</div></div>
-        <div class="tp-cell"><div class="tp-l">TP1 1:1</div><div class="tp-v" style="color:var(--green)" id="tpTP1">—</div></div>
-        <div class="tp-cell"><div class="tp-l">TP2 1:2</div><div class="tp-v" style="color:var(--green)" id="tpTP2">—</div></div>
-        <div class="tp-cell"><div class="tp-l">TP3 1:3</div><div class="tp-v" style="color:var(--green)" id="tpTP3">—</div></div>
+        <div class="tp-cell"><div class="tp-l">TP1</div><div class="tp-v" style="color:var(--green)" id="tpTP1">—</div><div class="tp-rr">—</div></div>
+        <div class="tp-cell"><div class="tp-l">TP2</div><div class="tp-v" style="color:var(--green)" id="tpTP2">—</div><div class="tp-rr">—</div></div>
+        <div class="tp-cell"><div class="tp-l">TP3</div><div class="tp-v" style="color:var(--green)" id="tpTP3">—</div><div class="tp-rr">—</div></div>
       </div>
       <div class="tp-note" id="tpNote"></div>
     </div>
@@ -390,6 +398,33 @@
         <div class="lres" style="flex-direction:column;align-items:flex-start;gap:2px"><div class="lrl">TIỀN NÊN VÀO/LỆNH</div><div class="lrv" style="font-size:16px;color:var(--gold)" id="posSize">—</div></div>
       </div>
       <div style="font-size:9px;color:var(--t1);font-family:var(--mono);margin-top:9px;text-align:center;font-weight:600" id="riskNote"></div>
+    </div>
+  </div>
+  <div class="section">
+    <div class="stitle">TÍNH LỢI NHUẬN THEO MỐC TP</div>
+    <div class="liq-wrap">
+      <div class="lgrid">
+        <div><div class="llbl">GIÁ VÀO</div><input class="linput" type="number" id="pfEntry" inputmode="decimal" placeholder="auto từ giá" oninput="calcProfit()"/></div>
+        <div><div class="llbl">CẮT LỖ (SL)</div><input class="linput" type="number" id="pfSL" inputmode="decimal" placeholder="0.00" oninput="calcProfit()"/></div>
+      </div>
+      <div class="lgrid">
+        <div><div class="llbl">VỐN VÀO LỆNH ($)</div><input class="linput" type="number" id="pfMargin" inputmode="decimal" value="10" oninput="calcProfit()"/></div>
+        <div><div class="llbl">ĐÒN BẨY (x)</div><input class="linput" type="number" id="pfLev" inputmode="numeric" value="100" oninput="calcProfit()"/></div>
+      </div>
+      <div class="dirrow">
+        <button class="dbtn al" id="pfL" onclick="setPfDir('LONG')">▲ MUA</button>
+        <button class="dbtn" id="pfS" onclick="setPfDir('SHORT')">▼ BÁN</button>
+      </div>
+      <div class="lgrid" style="margin-bottom:9px">
+        <div><div class="llbl">TP1</div><input class="linput" type="number" id="pfTP1" inputmode="decimal" placeholder="0.00" oninput="calcProfit()"/></div>
+        <div><div class="llbl">TP2</div><input class="linput" type="number" id="pfTP2" inputmode="decimal" placeholder="0.00" oninput="calcProfit()"/></div>
+      </div>
+      <div class="lgrid" style="margin-bottom:11px">
+        <div><div class="llbl">TP3</div><input class="linput" type="number" id="pfTP3" inputmode="decimal" placeholder="0.00" oninput="calcProfit()"/></div>
+        <div style="display:flex;align-items:flex-end"><button class="dbtn" style="width:100%;background:var(--goldbg);color:var(--gold);border-color:var(--gold2)" onclick="loadPlanToProfit()">📥 Lấy từ tín hiệu</button></div>
+      </div>
+      <div id="pfResults"></div>
+      <div style="font-size:9px;color:var(--t1);font-family:var(--mono);margin-top:9px;text-align:center;font-weight:600" id="pfNote">Nhập giá hoặc bấm "Lấy từ tín hiệu" để tính lãi mỗi mốc TP.</div>
     </div>
   </div>
 </div>
@@ -546,6 +581,8 @@ let lastAtr = 0;
 let dataSource = "—"; // "BingX" or "Binance(PAXG)"
 let fetchErrors = 0; // consecutive error counter for backoff
 let lastFetchOk = 0;
+let currentPlan = null; // {dir, entry, sl, tp1, tp2, tp3} — mức tín hiệu hiện tại
+let pfDir = "LONG"; // hướng cho bảng tính lợi nhuận
 
 // ══════════════════════════════════════════════════════
 //  PERSISTENCE
@@ -1146,6 +1183,56 @@ function detectStructure(o, h, l, c) {
   return { bullOB, bearOB, bullFVG, bearFVG, avgRange };
 }
 
+// ── Tìm các mức cản thật để đặt TP ──
+// Quét swing high/low (pivot) trên khung entry + thêm OB/FVG đối diện từ M15.
+// isBull=true → tìm các mức TRÊN giá (kháng cự, làm TP cho lệnh MUA).
+// isBull=false → tìm các mức DƯỚI giá (hỗ trợ, làm TP cho lệnh BÁN).
+function findTargets(h, l, last, isBull, structM15, atrVal) {
+  const n = h.length;
+  const levels = [];
+
+  // 1. Swing pivots: đỉnh/đáy cục bộ (so với 2 nến mỗi bên)
+  for (let i = n - 3; i >= n - 60 && i >= 2; i--) {
+    if (isBull) {
+      // swing high = đỉnh cao hơn 2 nến trái phải
+      if (h[i] > h[i-1] && h[i] > h[i-2] && h[i] > h[i+1] && h[i] > h[i+2] && h[i] > last) {
+        levels.push(h[i]);
+      }
+    } else {
+      if (l[i] < l[i-1] && l[i] < l[i-2] && l[i] < l[i+1] && l[i] < l[i+2] && l[i] < last) {
+        levels.push(l[i]);
+      }
+    }
+  }
+
+  // 2. OB/FVG đối diện từ M15 (vùng giá hay phản ứng)
+  if (isBull) {
+    if (structM15.bearOB && structM15.bearOB.bot > last) levels.push(structM15.bearOB.bot);
+    if (structM15.bearFVG && structM15.bearFVG.bot > last) levels.push(structM15.bearFVG.bot);
+  } else {
+    if (structM15.bullOB && structM15.bullOB.top < last) levels.push(structM15.bullOB.top);
+    if (structM15.bullFVG && structM15.bullFVG.top < last) levels.push(structM15.bullFVG.top);
+  }
+
+  // 3. Sắp xếp theo khoảng cách từ giá (gần → xa)
+  let sorted = levels
+    .map(p => ({ price: p, dist: Math.abs(p - last) }))
+    .sort((a, b) => a.dist - b.dist);
+
+  // 4. Lọc: bỏ mức quá gần (< 0.5 ATR — không đáng làm TP) và gộp mức sát nhau
+  const minGap = atrVal * 0.5;
+  const filtered = [];
+  for (const lv of sorted) {
+    if (lv.dist < minGap) continue; // quá gần giá
+    // bỏ nếu sát một mức đã chọn (< 0.6 ATR)
+    if (filtered.some(f => Math.abs(f.price - lv.price) < atrVal * 0.6)) continue;
+    filtered.push(lv);
+    if (filtered.length >= 3) break;
+  }
+
+  return filtered.map(f => f.price); // mảng giá, gần → xa, tối đa 3
+}
+
 // ══════════════════════════════════════════════════════
 //  SIGNAL ENGINE
 // ══════════════════════════════════════════════════════
@@ -1305,17 +1392,45 @@ async function fetchSignals() {
     const slDist = currentAtr * 1.0;
     const entry = last;
     const sl   = isBullPlan ? entry - slDist : entry + slDist;
-    const tp1  = isBullPlan ? entry + slDist * 1 : entry - slDist * 1;
-    const tp2  = isBullPlan ? entry + slDist * 2 : entry - slDist * 2;
-    const tp3  = isBullPlan ? entry + slDist * 3 : entry - slDist * 3;
+
+    // TP theo CẢN THẬT (gần → xa). Fallback về R cứng nếu thiếu cản.
+    const targets = findTargets(h, l, last, isBullPlan, structM15, currentAtr);
+    const rFallback = [1, 2, 3]; // bội số R dự phòng
+    function pickTP(idx) {
+      // Ưu tiên cản thật; nếu cản đó < idx*0.8 R thì vẫn nhận nhưng đánh dấu gần.
+      if (targets[idx] != null) {
+        const rr = Math.abs(targets[idx] - entry) / slDist;
+        // bỏ cản nếu nhỏ hơn cả mốc R tối thiểu của vị trí trước (đảm bảo tăng dần)
+        return { price: targets[idx], rr, real: true };
+      }
+      const p = isBullPlan ? entry + slDist * rFallback[idx] : entry - slDist * rFallback[idx];
+      return { price: p, rr: rFallback[idx], real: false };
+    }
+    let tpA = pickTP(0), tpB = pickTP(1), tpC = pickTP(2);
+    // Đảm bảo thứ tự tăng dần về khoảng cách (cản thật có thể lệch)
+    let ordered = [tpA, tpB, tpC].sort((x, y) => x.rr - y.rr);
+    tpA = ordered[0]; tpB = ordered[1]; tpC = ordered[2];
+    const tp1 = tpA.price, tp2 = tpB.price, tp3 = tpC.price;
     const slPct = slDist / entry * 100;
 
-    // Hiện mức giá lên bảng (luôn luôn)
+    // Hiện mức giá lên bảng (luôn luôn), kèm R:R thực của từng mốc
     document.getElementById("tpEntry").textContent = fmtP(entry);
     document.getElementById("tpSL").textContent    = fmtP(sl);
-    document.getElementById("tpTP1").textContent   = fmtP(tp1);
-    document.getElementById("tpTP2").textContent   = fmtP(tp2);
-    document.getElementById("tpTP3").textContent   = fmtP(tp3);
+    const setTP = (id, tpObj) => {
+      const el = document.getElementById(id);
+      el.textContent = fmtP(tpObj.price);
+      const sub = el.parentElement.querySelector(".tp-rr");
+      if (sub) {
+        sub.textContent = `${tpObj.rr.toFixed(1)}R ${tpObj.real ? "📍cản" : "~R"}`;
+        sub.style.color = tpObj.rr >= 1 ? "var(--green)" : "var(--yel)";
+      }
+    };
+    setTP("tpTP1", tpA);
+    setTP("tpTP2", tpB);
+    setTP("tpTP3", tpC);
+
+    // Lưu plan để bảng tính lợi nhuận "Lấy từ tín hiệu"
+    currentPlan = { dir: isBullPlan ? "LONG" : "SHORT", entry, sl, tp1, tp2, tp3 };
 
     // Ghi chú độ an toàn đòn bẩy (luôn hiện)
     const lev = parseFloat(document.getElementById("liqL").value) || 100;
@@ -1853,6 +1968,106 @@ function calcAll() {
   checkDD();
 }
 
+// ── Bảng tính lợi nhuận theo mốc TP ──
+function setPfDir(d) {
+  pfDir = d;
+  document.getElementById("pfL").className = "dbtn" + (d === "LONG" ? " al" : "");
+  document.getElementById("pfS").className = "dbtn" + (d === "SHORT" ? " as" : "");
+  calcProfit();
+}
+
+function loadPlanToProfit() {
+  if (!currentPlan) {
+    toast("⚠️ Chưa có mức tín hiệu — mở tab Tín Hiệu trước");
+    return;
+  }
+  document.getElementById("pfEntry").value = fmtP(currentPlan.entry);
+  document.getElementById("pfSL").value    = fmtP(currentPlan.sl);
+  document.getElementById("pfTP1").value   = fmtP(currentPlan.tp1);
+  document.getElementById("pfTP2").value   = fmtP(currentPlan.tp2);
+  document.getElementById("pfTP3").value   = fmtP(currentPlan.tp3);
+  setPfDir(currentPlan.dir);
+  toast("📥 Đã lấy mức từ tín hiệu");
+}
+
+function calcProfit() {
+  const entry  = parseFloat(document.getElementById("pfEntry").value);
+  const sl     = parseFloat(document.getElementById("pfSL").value);
+  const margin = parseFloat(document.getElementById("pfMargin").value);
+  const lev    = parseFloat(document.getElementById("pfLev").value);
+  const box = document.getElementById("pfResults");
+
+  if (!entry || !margin || !lev) {
+    box.innerHTML = "";
+    return;
+  }
+
+  // Giá trị vị thế = vốn × đòn bẩy. Số "đơn vị vàng" = posValue / entry.
+  const posValue = margin * lev;
+  const units = posValue / entry;
+  const isLong = pfDir === "LONG";
+
+  // Tính lãi/lỗ tại 1 mức giá bất kỳ
+  const pnlAt = (price) => {
+    if (!price) return null;
+    const diff = isLong ? (price - entry) : (entry - price);
+    const pnl = diff * units;            // lãi/lỗ tính bằng $
+    const roi = (pnl / margin) * 100;    // ROI trên vốn vào lệnh
+    const movePct = Math.abs(diff / entry * 100);
+    return { pnl, roi, movePct };
+  };
+
+  const rows = [];
+
+  // SL row (lỗ)
+  if (sl) {
+    const r = pnlAt(sl);
+    if (r) rows.push(`
+      <div class="pf-row pf-row-sl">
+        <div class="pf-lbl" style="color:var(--red)">✖ CẮT LỖ (SL)</div>
+        <div class="pf-vals">
+          <div class="pf-money" style="color:var(--red)">${r.pnl.toFixed(2)}$</div>
+          <div class="pf-roi" style="color:var(--red)">ROI ${r.roi.toFixed(1)}% · giá đi ${r.movePct.toFixed(3)}%</div>
+        </div>
+      </div>`);
+  }
+
+  // TP rows (lãi)
+  const slDist = sl ? Math.abs(entry - sl) : null;
+  [["TP1","pfTP1"],["TP2","pfTP2"],["TP3","pfTP3"]].forEach(([label,id]) => {
+    const price = parseFloat(document.getElementById(id).value);
+    const r = pnlAt(price);
+    if (!r) return;
+    const rr = slDist ? (Math.abs(price - entry) / slDist) : null;
+    rows.push(`
+      <div class="pf-row pf-row-tp">
+        <div class="pf-lbl" style="color:var(--green)">✓ ${label}${rr ? ` · ${rr.toFixed(1)}R` : ""}</div>
+        <div class="pf-vals">
+          <div class="pf-money" style="color:var(--green)">+${r.pnl.toFixed(2)}$</div>
+          <div class="pf-roi" style="color:var(--green)">ROI +${r.roi.toFixed(1)}% · giá đi ${r.movePct.toFixed(3)}%</div>
+        </div>
+      </div>`);
+  });
+
+  box.innerHTML = rows.join("");
+
+  // Ghi chú tổng quan
+  const note = document.getElementById("pfNote");
+  if (sl) {
+    const tp1p = parseFloat(document.getElementById("pfTP1").value);
+    if (tp1p) {
+      const rr1 = Math.abs(tp1p - entry) / Math.abs(entry - sl);
+      note.textContent = rr1 >= 1.5
+        ? `✅ TP1 đạt ${rr1.toFixed(1)}R — tỉ lệ lời/lỗ tốt`
+        : rr1 >= 1
+          ? `🟡 TP1 ${rr1.toFixed(1)}R — chấp nhận được, nên để TP2/TP3 chạy`
+          : `🔴 TP1 chỉ ${rr1.toFixed(1)}R — lời ít hơn lỗ, cân nhắc lại`;
+    }
+  } else {
+    note.textContent = "Nhập SL để tính tỉ lệ R:R và lỗ tối đa.";
+  }
+}
+
 function checkDD() {
   const e = parseFloat(document.getElementById("liqE").value);
   if (!e || !priceNow) return;
@@ -2038,6 +2253,7 @@ renderSession();
 updateNotifBtn();
 startMacroTimers();
 startCandleCountdown();
+setPfDir("LONG");
 fetchDXY();
 fetchAll();
 fetchSlow();
